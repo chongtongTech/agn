@@ -156,7 +156,7 @@
         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-9">
             <ul class="nav navbar-nav">
                 <li class="active"><a href="#">评分查询</a></li>
-                <li><a target="acfun" href="http://www.acfun.cn/">Acfun</a></li>
+                <li><a target="acfun" href="https://www.acfun.cn/">Acfun</a></li>
                 <li><a target="acfun" href="index.html">Agn生成器</a></li>
             </ul>
         </div><!-- /.navbar-collapse -->
@@ -183,18 +183,18 @@
             </thead>
             <tr v-for="item in list">
             <td><a href="javascript:void(0)" @click="getAcid(item.acid)" >{{item.title}}</a></td>
-            <td><a :href="`http://www.acfun.cn/a/${item.acid}`" target="acfun">跳转</a></td>
+            <td><a :href="`https://www.acfun.cn/a/${item.acid}`" target="acfun">跳转</a></td>
                 <td>{{item.score}}</td>
-                <td><a :href="`http://www.acfun.cn/member/findUser.aspx?userName=${item.comment}`" target="acfun">{{item.comment}}</a></td>
+                <td><a :href="`https://www.acfun.cn/member/findUser.aspx?userName=${item.comment}`" target="acfun">{{item.comment}}</a></td>
                 <td>{{item.summary}}</td>
-                <td><a href="javascript:void(0)" @click="view(item.acid,item.score,item.comment,item.summary,item.content)" >查看</a></td>
+                <td><a href="javascript:void(0)" @click="view(item)" >查看</a></td>
             </tr>
         </table>
         <p class="h3 text-center" v-if="averageScore">平均分{{averageScore.toFixed(2)}}</p>
         <nav aria-label="">
             <ul class="pager">
-                <li class="previous"><a @click="pagePrev" href="javascript:void(0)"><span aria-hidden="true">&larr;</span>上一页</a></li>
-                <li class="next"><a @click="pageNext" href="javascript:void(0)">下一页<span aria-hidden="true">&rarr;</span></a></li>
+                <li class="previous"><a v-if="page>1" @click="pagePrev" href="javascript:void(0)"><span aria-hidden="true">&larr;</span>上一页</a></li>
+                <li class="next"><a v-if="list.length==20" @click="pageNext" href="javascript:void(0)">下一页<span aria-hidden="true">&rarr;</span></a></li>
             </ul>
         </nav>
     </div>
@@ -225,7 +225,7 @@
 
                 </div>
                 <p class="text-overflow" v-html="content.replace(/\n/g,'<br>')"></p>
-                <p>评论员：{{comment}}  {{moment().format('YYYY年MM月DD日')}}</p>
+                <p>评论员：{{comment}}  {{moment(commentDate).format('YYYY年MM月DD日')}}</p>
             </div>
             <div class="clearfix"></div>
         </div>
@@ -250,7 +250,7 @@
                 reverse:true,
                 list:[],
                 showList: true,
-
+                commentDate:'',
                 score:10,
                 lemon:false,
                 title:'',
@@ -327,15 +327,16 @@
                 this.showList = true
                 this.page = 1
             },
-            view(acid,score,comment,summary,content){
+            view(item){
                 this.showList = false
-                this.score = score
-                this.comment = comment
-                this.summary = summary
-                this.articleContent = content
-                this.content = content
-
-                let aid = +acid.replace('http://www.acfun.cn/a/ac','').replace("ac","").replace("\/","").trim()
+                this.score = item.score
+                this.comment = item.comment
+                this.summary = item.summary
+                this.articleContent = item.content
+                this.content = item.content
+                this.commentDate = item.createdAt
+                const acid = item.acid
+                let aid = +acid.replace('https://www.acfun.cn/a/ac','').replace("ac","").replace("\/","").trim()
                 if(aid){
                     axios.get(`https://api.novel.xuwendiao.com/acfun/contents/${aid}`).then(res=>{
                         if(res.data.code === 200){
@@ -379,7 +380,7 @@
                 if(e){
                     e.preventDefault();
                 }
-                axios.get(`https://acfun.leanapp.cn/agnscore?acid=${this.acid.replace('http://www.acfun.cn/a/',"")}`+
+                axios.get(`https://acfun.leanapp.cn/agnscore?acid=${this.acid.replace('https://www.acfun.cn/a/',"")}`+
                         `&page=${this.page}&author=${this.author}&orderBy=${this.orderBy}&reverse=${this.reverse}&comment=${this.comment}`).then(res=>{
                     if(res.data.code === 200){
                         this.list = res.data.data
